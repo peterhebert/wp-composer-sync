@@ -111,11 +111,13 @@ Apply these changes? [y/n] y
 The package includes a manifest file for known premium plugins. You can customize it for your needs:
 
 1. Copy the example manifest:
+
    ```bash
-   cp vendor/peterhebert/wp-composer-sync/pro-plugins.json.dist pro-plugins.json
+   cp vendor/peterhebert/wp-composer-sync/pro-plugins.default.json pro-plugins.json
    ```
 
 2. Edit `pro-plugins.json` to add your premium plugins:
+
    ```json
    {
      "repositories": [
@@ -139,11 +141,12 @@ The package includes a manifest file for known premium plugins. You can customiz
    ```
 
 **Benefits of the repository-first structure:**
+
 - No repetition - define the repository URL once for multiple plugins
 - Easy to add entire product families (Gravity Forms, WP Migrate, etc.)
 - Maintainable - edit JSON instead of PHP code
 
-The command checks for `pro-plugins.json` first (your custom version), then falls back to `pro-plugins.json.dist` (the included example).
+The command checks for `pro-plugins.json` first (your custom version), then falls back to `pro-plugins.default.json` (the included example).
 
 ## Requirements
 

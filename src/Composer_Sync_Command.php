@@ -298,14 +298,14 @@ class Composer_Sync_Command extends WP_CLI_Command {
      * @return array|null Repository config if found, null otherwise.
      */
     private function check_known_pro_repos( $name ) {
-        // Try to load from external manifest (custom first, then .dist)
+        // Try to load from external manifest (custom first, then .default.json)
         $base_dir = dirname( __DIR__ );
         $manifest_file = null;
         
         if ( file_exists( $base_dir . '/pro-plugins.json' ) ) {
             $manifest_file = $base_dir . '/pro-plugins.json';
-        } elseif ( file_exists( $base_dir . '/pro-plugins.json.dist' ) ) {
-            $manifest_file = $base_dir . '/pro-plugins.json.dist';
+        } elseif ( file_exists( $base_dir . '/pro-plugins.default.json' ) ) {
+            $manifest_file = $base_dir . '/pro-plugins.default.json';
         }
         
         if ( $manifest_file ) {
