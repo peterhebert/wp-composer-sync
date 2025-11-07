@@ -89,7 +89,12 @@ class Composer_Sync_Command extends WP_CLI_Command {
                     $new_repositories[ $repo['url'] ] = $repo;
                 }
             } else {
-                $not_found[] = [ 'name' => $plugin_data['Name'], 'version' => $plugin_data['Version'], 'type' => 'plugin' ];
+                $not_found[] = [ 
+                    'name' => $plugin_data['Name'], 
+                    'version' => $plugin_data['Version'], 
+                    'type' => 'plugin',
+                    'slug' => $plugin_data['slug']
+                ];
             }
         }
 
@@ -107,7 +112,8 @@ class Composer_Sync_Command extends WP_CLI_Command {
                 $not_found[] = [
                     'name' => $plugin_data['Name'] . ' (single file)',
                     'version' => $plugin_data['Version'],
-                    'type' => 'mu-plugin'
+                    'type' => 'mu-plugin',
+                    'slug' => null
                 ];
                 continue;
             }
@@ -122,7 +128,12 @@ class Composer_Sync_Command extends WP_CLI_Command {
                     $new_repositories[ $repo['url'] ] = $repo;
                 }
             } else {
-                $not_found[] = [ 'name' => $plugin_data['Name'], 'version' => $plugin_data['Version'], 'type' => 'mu-plugin' ];
+                $not_found[] = [ 
+                    'name' => $plugin_data['Name'], 
+                    'version' => $plugin_data['Version'], 
+                    'type' => 'mu-plugin',
+                    'slug' => $slug
+                ];
             }
         }
 
@@ -145,7 +156,12 @@ class Composer_Sync_Command extends WP_CLI_Command {
                 $new_repositories[ $repo['url'] ] = $repo;
             }
         } else {
-            $not_found[] = [ 'name' => $theme_data['Name'], 'version' => $theme_data['Version'], 'type' => 'theme' ];
+            $not_found[] = [ 
+                'name' => $theme_data['Name'], 
+                'version' => $theme_data['Version'], 
+                'type' => 'theme',
+                'slug' => $theme_data['slug']
+            ];
         }
 
         // --- 7. Collate & Merge Results ---
@@ -155,6 +171,19 @@ class Composer_Sync_Command extends WP_CLI_Command {
                 'url'  => 'https://wpackagist.org',
             ];
         }
+
+        // --- 7.5. Try to match unresolved items against existing composer.json packages ---
+        $still_not_found = [];
+        foreach ( $not_found as $item ) {
+            $matched = $this->try_match_existing_package( $item, $composer_json );
+            
+            if ( $matched ) {
+                $new_requires[ $matched['package'] ] = $matched['version'];
+            } else {
+                $still_not_found[] = $item;
+            }
+        }
+        $not_found = $still_not_found;
 
         $final_json = $composer_json;
         $final_json['require'] = array_merge(
@@ -266,6 +295,83 @@ class Composer_Sync_Command extends WP_CLI_Command {
         ];
 
         return $known_repos[ $name ] ?? null;
+    }
+
+    /**
+     * Try to match an unresolved plugin/theme against existing packages in composer.json.
+     * 
+     * Looks for packages where the slug matches the package name after the vendor prefix.
+     * For example: slug 'searchwp' would match package 'searchwp/searchwp'.
+     * 
+     * @param array $item The unresolved item with 'name', 'version', 'type', and 'slug' keys.
+     * @param array $composer_json The current composer.json data.
+     * @return array|null Array with 'package' and 'version' if matched and confirmed, null otherwise.
+     */
+    private function try_match_existing_package( $item, $composer_json ) {
+        // Get the slug - need to look it up from the scan data
+        // For now, we'll need to pass slug through the not_found array
+        if ( ! isset( $item['slug'] ) ) {
+            return null;
+        }
+        
+        $slug = $item['slug'];
+        $type = $item['type'];
+        
+        // Search through both 'require' and 'require-dev' for potential matches
+        $all_packages = array_merge(
+            $composer_json['require'] ?? [],
+            $composer_json['require-dev'] ?? []
+        );
+        
+        $potential_matches = [];
+        
+        foreach ( $all_packages as $package => $version ) {
+            // Skip WordPress core packages
+            if ( in_array( $package, [ 'roots/wordpress', 'johnpbloch/wordpress' ], true ) ) {
+                continue;
+            }
+            
+            // Extract package name after vendor (e.g., 'searchwp/searchwp' -> 'searchwp')
+            $parts = explode( '/', $package );
+            if ( count( $parts ) === 2 ) {
+                $package_name = $parts[1];
+                
+                // Check if slug matches package name (case-insensitive)
+                if ( strtolower( $slug ) === strtolower( $package_name ) ) {
+                    $potential_matches[] = $package;
+                }
+            }
+        }
+        
+        // If we found exactly one match, confirm with user
+        if ( count( $potential_matches ) === 1 ) {
+            $package = $potential_matches[0];
+            
+            WP_CLI::log( '' );
+            WP_CLI::log( WP_CLI::colorize( "%YPotential match found:%n" ) );
+            WP_CLI::log( "  {$type}: {$item['name']} (v{$item['version']})" );
+            WP_CLI::log( "  Package: {$package}" );
+            
+            try {
+                WP_CLI::confirm( 'Use this package?' );
+                
+                // Convert version to major.minor format with caret
+                $version_parts = explode( '.', $item['version'] );
+                $minor_version = isset( $version_parts[1] ) ? "{$version_parts[0]}.{$version_parts[1]}" : $version_parts[0];
+                $version_constraint = ( $type === 'mu-plugin' ) ? $minor_version : "^{$minor_version}";
+                
+                return [
+                    'package' => $package,
+                    'version' => $version_constraint,
+                ];
+            } catch ( \Exception $e ) {
+                // User declined
+                return null;
+            }
+        }
+        
+        // Multiple matches or no matches - return null to add to not_found
+        return null;
     }
 
     /**
