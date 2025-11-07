@@ -360,9 +360,11 @@ class Composer_Sync_Command extends WP_CLI_Command {
                 WP_CLI::log( WP_CLI::colorize( "  %RNote: This is a single-file MU-plugin%n" ) );
             }
             
-            try {
-                WP_CLI::confirm( 'Use this package?' );
-                
+            // Prompt with 'y' as default (safer to require explicit confirmation for matches)
+            fwrite( STDOUT, 'Use this package? [y/N] ' );
+            $response = trim( fgets( STDIN ) );
+            
+            if ( strtolower( $response ) === 'y' || strtolower( $response ) === 'yes' ) {
                 // Convert version to major.minor format with caret
                 $version_parts = explode( '.', $item['version'] );
                 $minor_version = isset( $version_parts[1] ) ? "{$version_parts[0]}.{$version_parts[1]}" : $version_parts[0];
@@ -372,10 +374,10 @@ class Composer_Sync_Command extends WP_CLI_Command {
                     'package' => $package,
                     'version' => $version_constraint,
                 ];
-            } catch ( \Exception $e ) {
-                // User declined
-                return null;
             }
+            
+            // User declined or pressed enter (default)
+            return null;
         }
         
         // Multiple matches or no matches - return null to add to not_found
