@@ -6,6 +6,7 @@
 
 # PHPUnit test coverage
 /coverage/
+.phpunit.result.cache
 
 # Log files
 *.log

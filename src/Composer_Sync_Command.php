@@ -45,16 +45,30 @@ class Composer_Sync_Command extends WP_CLI_Command {
 
         // --- 3. Process WordPress Core ---
         WP_CLI::log( 'Scanning WordPress Core...' );
-        $wp_version = get_bloginfo( 'version' );
-        $new_requires['johnpbloch/wordpress'] = "^{$wp_version}";
+        $wp_version = \get_bloginfo( 'version' );
+        
+        // Check if user already has a WordPress package configured
+        $existing_wp_package = null;
+        $known_wp_packages = [ 'roots/wordpress', 'johnpbloch/wordpress' ];
+        
+        foreach ( $known_wp_packages as $wp_package ) {
+            if ( isset( $composer_json['require'][ $wp_package ] ) ) {
+                $existing_wp_package = $wp_package;
+                break;
+            }
+        }
+        
+        // Use existing package or default to roots/wordpress
+        $wp_package_name = $existing_wp_package ?? 'roots/wordpress';
+        $new_requires[ $wp_package_name ] = "^{$wp_version}";
 
         // --- 4. Process Active Plugins ---
         WP_CLI::log( 'Scanning active plugins...' );
-        if ( ! function_exists( 'get_plugins' ) ) {
+        if ( ! \function_exists( 'get_plugins' ) ) {
             require_once ABSPATH . 'wp-admin/includes/plugin.php';
         }
-        $all_plugins = get_plugins();
-        $active_plugins = get_option( 'active_plugins' );
+        $all_plugins = \get_plugins();
+        $active_plugins = \get_option( 'active_plugins' );
 
         foreach ( $active_plugins as $plugin_file ) {
             if ( ! isset( $all_plugins[ $plugin_file ] ) ) {
@@ -77,10 +91,10 @@ class Composer_Sync_Command extends WP_CLI_Command {
 
         // --- 5. Process MU-Plugins (Must-Use) ---
         WP_CLI::log( 'Scanning Must-Use plugins...' );
-        if ( ! function_exists( 'get_mu_plugins' ) ) {
+        if ( ! \function_exists( 'get_mu_plugins' ) ) {
             require_once ABSPATH . 'wp-admin/includes/plugin.php';
         }
-        $all_mu_plugins = get_mu_plugins();
+        $all_mu_plugins = \get_mu_plugins();
 
         foreach ( $all_mu_plugins as $plugin_file => $plugin_data ) {
             $slug = dirname( $plugin_file );
@@ -110,7 +124,7 @@ class Composer_Sync_Command extends WP_CLI_Command {
 
         // --- 6. Process Active Theme ---
         WP_CLI::log( 'Scanning active theme...' );
-        $theme = wp_get_theme();
+        $theme = \wp_get_theme();
         $theme_to_process = $theme->parent() ? $theme->parent() : $theme;
         
         $theme_data = [
@@ -209,9 +223,9 @@ class Composer_Sync_Command extends WP_CLI_Command {
         // --- 3. Check WP.org API (Wpackagist) ---
         if ( $type === 'plugin' || $type === 'theme' ) {
             $api_url = "https://api.wordpress.org/{$type}s/info/1.0/{$slug}.json";
-            $response = wp_remote_get( $api_url );
+            $response = \wp_remote_get( $api_url );
             
-            if ( ! is_wp_error( $response ) && wp_remote_retrieve_response_code( $response ) === 200 ) {
+            if ( ! \is_wp_error( $response ) && \wp_remote_retrieve_response_code( $response ) === 200 ) {
                 $this->wpackagist_used = true;
                 $vendor = ( $type === 'plugin' ) ? 'wpackagist-plugin' : 'wpackagist-theme';
                 $package_name = "{$vendor}/{$slug}";
