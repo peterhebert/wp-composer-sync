@@ -1,0 +1,58 @@
+{
+  "$schema": "https://json-schema.org/draft-07/schema#",
+  "title": "Premium WordPress Plugins Repository Manifest",
+  "description": "Configuration for known premium WordPress plugins and their composer repositories. Copy this file to 'pro-plugins.json' and customize for your needs.",
+  "repositories": [
+    {
+      "url": "https://connect.advancedcustomfields.com",
+      "type": "composer",
+      "plugins": {
+        "Advanced Custom Fields Pro": "advanced-custom-fields/advanced-custom-fields-pro"
+      }
+    },
+    {
+      "url": "https://composer.gravityforms.com",
+      "type": "composer",
+      "note": "All Gravity Forms plugins use the format: gravityforms/{slug}",
+      "plugins": {
+        "Gravity Forms": "gravityforms/gravityforms",
+        "Gravity Forms CLI": "gravityforms/gravityformscli",
+        "Gravity Forms Signature Add-On": "gravityforms/gravityformssignature",
+        "Gravity Forms Survey Add-On": "gravityforms/gravityformssurvey",
+        "Gravity Forms Quiz Add-On": "gravityforms/gravityformsquiz",
+        "Gravity Forms Polls Add-On": "gravityforms/gravityformspolls",
+        "Gravity Forms User Registration Add-On": "gravityforms/gravityformsuserregistration",
+        "Gravity Forms Zapier Add-On": "gravityforms/gravityformszapier",
+        "Gravity Forms PayPal Add-On": "gravityforms/gravityformspaypal",
+        "Gravity Forms Stripe Add-On": "gravityforms/gravityformsstripe",
+        "Gravity Forms Square Add-On": "gravityforms/gravityformssquare",
+        "Gravity Forms Authorize.Net Add-On": "gravityforms/gravityformsauthorizenet",
+        "Gravity Forms PayPal Checkout Add-On": "gravityforms/gravityformspaypalcheckout",
+        "Gravity Forms AWeber Add-On": "gravityforms/gravityformsaweber",
+        "Gravity Forms Campaign Monitor Add-On": "gravityforms/gravityformscampaignmonitor",
+        "Gravity Forms Emma Add-On": "gravityforms/gravityformsemma",
+        "Gravity Forms GetResponse Add-On": "gravityforms/gravityformsgetresponse",
+        "Gravity Forms iContact Add-On": "gravityforms/gravityformsicontact",
+        "Gravity Forms Mad Mimi Add-On": "gravityforms/gravityformsmadmimi",
+        "Gravity Forms Mailchimp Add-On": "gravityforms/gravityformsmailchimp",
+        "Gravity Forms ActiveCampaign Add-On": "gravityforms/gravityformsactivecampaign",
+        "Gravity Forms Agile CRM Add-On": "gravityforms/gravityformsagilecrm",
+        "Gravity Forms Breeze Add-On": "gravityforms/gravityformsbreeze",
+        "Gravity Forms Capsule Add-On": "gravityforms/gravityformscapsule",
+        "Gravity Forms Freshbooks Add-On": "gravityforms/gravityformsfreshbooks",
+        "Gravity Forms Help Scout Add-On": "gravityforms/gravityformshelpscout",
+        "Gravity Forms Highrise Add-On": "gravityforms/gravityformshighrise",
+        "Gravity Forms HubSpot Add-On": "gravityforms/gravityformshubspot",
+        "Gravity Forms Pardot Add-On": "gravityforms/gravityformspardot",
+        "Gravity Forms Salesforce Add-On": "gravityforms/gravityformssalesforce",
+        "Gravity Forms Trello Add-On": "gravityforms/gravityformstrello",
+        "Gravity Forms Zoho CRM Add-On": "gravityforms/gravityformszohocrm",
+        "Gravity Forms Slack Add-On": "gravityforms/gravityformsslack",
+        "Gravity Forms Dropbox Add-On": "gravityforms/gravityformsdropbox",
+        "Gravity Forms WebHooks Add-On": "gravityforms/gravityformswebhooks",
+        "Gravity Forms Partial Entries Add-On": "gravityforms/gravityformspartialentries",
+        "Gravity Forms Coupons Add-On": "gravityforms/gravityformscoupons"
+      }
+    }
+  ]
+}

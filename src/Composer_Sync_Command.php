@@ -298,18 +298,64 @@ class Composer_Sync_Command extends WP_CLI_Command {
      * @return array|null Repository config if found, null otherwise.
      */
     private function check_known_pro_repos( $name ) {
+        // Try to load from external manifest (custom first, then .dist)
+        $base_dir = dirname( __DIR__ );
+        $manifest_file = null;
+        
+        if ( file_exists( $base_dir . '/pro-plugins.json' ) ) {
+            $manifest_file = $base_dir . '/pro-plugins.json';
+        } elseif ( file_exists( $base_dir . '/pro-plugins.json.dist' ) ) {
+            $manifest_file = $base_dir . '/pro-plugins.json.dist';
+        }
+        
+        if ( $manifest_file ) {
+            $manifest_data = json_decode( file_get_contents( $manifest_file ), true );
+            if ( $manifest_data && isset( $manifest_data['repositories'] ) ) {
+                return $this->match_plugin_to_repo( $name, $manifest_data['repositories'] );
+            }
+        }
+        
+        // Fallback to minimal hardcoded repos if no manifest
         $known_repos = [
-            'Advanced Custom Fields Pro' => [
-                'package'    => 'advanced-custom-fields/advanced-custom-fields-pro',
-                'repository' => [
-                    'type' => 'composer',
-                    'url'  => 'https://connect.advancedcustomfields.com',
+            [
+                'url' => 'https://connect.advancedcustomfields.com',
+                'type' => 'composer',
+                'plugins' => [
+                    'Advanced Custom Fields Pro' => 'advanced-custom-fields/advanced-custom-fields-pro',
                 ],
             ],
-            // ... Add other common pro plugins here ...
         ];
 
-        return $known_repos[ $name ] ?? null;
+        return $this->match_plugin_to_repo( $name, $known_repos );
+    }
+
+    /**
+     * Match a plugin name to a repository and return package info.
+     *
+     * @param string $plugin_name The display name of the plugin.
+     * @param array  $repositories Array of repository configurations with plugins.
+     * @return array|null Repository config with package if found, null otherwise.
+     */
+    private function match_plugin_to_repo( $plugin_name, $repositories ) {
+        foreach ( $repositories as $repo ) {
+            if ( ! isset( $repo['plugins'] ) || ! is_array( $repo['plugins'] ) ) {
+                continue;
+            }
+            
+            foreach ( $repo['plugins'] as $name => $package ) {
+                if ( $name === $plugin_name ) {
+                    return [
+                        'package' => $package,
+                        'repository' => [
+                            'type' => $repo['type'] ?? 'composer',
+                            'url' => $repo['url'],
+                        ],
+                    ];
+                }
+            }
+        }
+        
+        return null;
     }
 
     /**

@@ -8,6 +8,9 @@
 /coverage/
 .phpunit.result.cache
 
+# Custom pro plugins manifest (users can override)
+/pro-plugins.json
+
 # Log files
 *.log
 
