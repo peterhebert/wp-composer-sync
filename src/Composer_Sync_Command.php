@@ -334,68 +334,33 @@ class Composer_Sync_Command extends WP_CLI_Command {
     /**
      * Check if an existing constraint would satisfy a new version requirement.
      * 
-     * This checks if the existing constraint is "good enough" compared to what we'd write.
-     * We always write caret constraints (^X.Y) for new packages, but existing packages
-     * might use other styles (tilde ~, exact, ranges, etc.).
+     * Logic: Only update composer.json if the installed version has a DIFFERENT major version
+     * than what the existing constraint allows. Minor/patch updates within the same major
+     * version are already handled by the existing constraint.
      *
-     * @param string $existing_constraint The existing version constraint (e.g., "^1.2", "~1.2.3", ">=1.2").
-     * @param string $new_constraint The new version constraint we would write (always ^X.Y format).
+     * Examples:
+     * - Existing: ^5.3, Installed: 5.5.1 → No update needed (^5.3 covers 5.5.x)
+     * - Existing: ^5.3, Installed: 6.0.1 → Update to ^6.0 (major version changed)
+     * - Existing: ~5.3.0, Installed: 5.5.1 → No update needed (~5.3.0 doesn't cover 5.5, but we're lenient)
+     *
+     * @param string $existing_constraint The existing version constraint (e.g., "^5.3", "~5.2.3").
+     * @param string $new_constraint The new version constraint based on installed (e.g., "^5.5", "^6.0").
      * @return bool True if the existing constraint is sufficient (no update needed).
      */
     private function constraint_satisfies( $existing_constraint, $new_constraint ) {
-        // Extract the target version from new constraint (always ^X.Y format)
-        $target_version = ltrim( $new_constraint, '^~><=! ' );
+        // Extract versions
+        $existing_version = preg_replace( '/^[^0-9]*/', '', $existing_constraint );
+        $new_version = preg_replace( '/^[^0-9]*/', '', $new_constraint );
         
-        // Caret (^) - allows changes that don't modify left-most non-zero digit
-        // ^1.2 means >=1.2.0 <2.0.0
-        if ( strpos( $existing_constraint, '^' ) === 0 ) {
-            $existing_version = ltrim( $existing_constraint, '^' );
-            // If existing ^X.Y >= target X.Y, it's satisfied
-            return version_compare( $existing_version, $target_version, '>=' );
-        }
+        // Get major versions
+        $existing_parts = explode( '.', $existing_version );
+        $new_parts = explode( '.', $new_version );
         
-        // Tilde (~) - allows patch-level changes
-        // ~1.2 means >=1.2.0 <1.3.0
-        // ~1.2.3 means >=1.2.3 <1.3.0
-        if ( strpos( $existing_constraint, '~' ) === 0 ) {
-            $existing_version = ltrim( $existing_constraint, '~' );
-            $existing_parts = explode( '.', $existing_version );
-            $target_parts = explode( '.', $target_version );
-            
-            // Check if major.minor match
-            if ( isset( $existing_parts[0], $existing_parts[1], $target_parts[0], $target_parts[1] ) ) {
-                if ( $existing_parts[0] === $target_parts[0] && 
-                     version_compare( $existing_parts[1], $target_parts[1], '>=' ) ) {
-                    return true;
-                }
-            }
-            return false;
-        }
+        $existing_major = isset( $existing_parts[0] ) ? (int) $existing_parts[0] : 0;
+        $new_major = isset( $new_parts[0] ) ? (int) $new_parts[0] : 0;
         
-        // Greater than or equal (>=, >, etc.)
-        if ( preg_match( '/^(>=?)\s*(.+)$/', $existing_constraint, $matches ) ) {
-            $operator = $matches[1];
-            $existing_version = $matches[2];
-            
-            if ( $operator === '>=' ) {
-                // If existing >=X.Y and X.Y >= target, it's satisfied
-                return version_compare( $existing_version, $target_version, '<=' );
-            } else if ( $operator === '>' ) {
-                // If existing >X.Y and X.Y > target, it's satisfied
-                return version_compare( $existing_version, $target_version, '<' );
-            }
-        }
-        
-        // Exact version match (no prefix)
-        if ( preg_match( '/^\d+\.\d+/', $existing_constraint ) && 
-             strpos( $existing_constraint, '*' ) === false &&
-             strpos( $existing_constraint, ' ' ) === false ) {
-            // Exact version - only satisfied if it's >= target
-            return version_compare( $existing_constraint, $target_version, '>=' );
-        }
-        
-        // For complex ranges (||, AND, ranges with spaces), wildcards, etc., 
-        // we can't easily determine - safer to not modify
-        return true;
+        // If major versions are the same, existing constraint is good enough
+        // (Minor/patch updates within same major are fine)
+        return $existing_major === $new_major;
     }
 }
