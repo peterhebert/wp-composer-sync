@@ -47,6 +47,10 @@ class Composer_Sync_Command extends WP_CLI_Command {
         WP_CLI::log( 'Scanning WordPress Core...' );
         $wp_version = \get_bloginfo( 'version' );
         
+        // Convert to major.minor only
+        $version_parts = explode( '.', $wp_version );
+        $wp_minor_version = isset( $version_parts[1] ) ? "{$version_parts[0]}.{$version_parts[1]}" : $version_parts[0];
+        
         // Check if user already has a WordPress package configured
         $existing_wp_package = null;
         $known_wp_packages = [ 'roots/wordpress', 'johnpbloch/wordpress' ];
@@ -60,7 +64,7 @@ class Composer_Sync_Command extends WP_CLI_Command {
         
         // Use existing package or default to roots/wordpress
         $wp_package_name = $existing_wp_package ?? 'roots/wordpress';
-        $new_requires[ $wp_package_name ] = "^{$wp_version}";
+        $new_requires[ $wp_package_name ] = "^{$wp_minor_version}";
 
         // --- 4. Process Active Plugins ---
         WP_CLI::log( 'Scanning active plugins...' );
@@ -194,7 +198,12 @@ class Composer_Sync_Command extends WP_CLI_Command {
         $slug = $data['slug'];
         $name = $data['Name'];
         $version = $data['Version'];
-        $version_constraint = ( $type === 'mu-plugin' ) ? $version : "^{$version}";
+        
+        // Convert version to major.minor only (e.g., "1.2.3" -> "1.2")
+        $version_parts = explode( '.', $version );
+        $minor_version = isset( $version_parts[1] ) ? "{$version_parts[0]}.{$version_parts[1]}" : $version_parts[0];
+        
+        $version_constraint = ( $type === 'mu-plugin' ) ? $minor_version : "^{$minor_version}";
 
         // --- 1. Check Hard-Coded "Pro" Map ---
         $pro_repo = $this->check_known_pro_repos( $name );
@@ -276,7 +285,10 @@ class Composer_Sync_Command extends WP_CLI_Command {
             if ( ! isset( $original_requires[ $package ] ) ) {
                 $changes['require'][] = "ADD:    {$package}: {$version}";
             } elseif ( $original_requires[ $package ] !== $version ) {
-                $changes['require'][] = "MODIFY: {$package}: {$original_requires[$package]} -> {$version}";
+                // Check if the existing constraint would satisfy the new version
+                if ( ! $this->constraint_satisfies( $original_requires[ $package ], $version ) ) {
+                    $changes['require'][] = "MODIFY: {$package}: {$original_requires[$package]} -> {$version}";
+                }
             }
         }
 
@@ -316,6 +328,74 @@ class Composer_Sync_Command extends WP_CLI_Command {
         $json_output = json_encode( $final_json, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES );
         file_put_contents( $output_file, $json_output );
         
+        return true;
+    }
+
+    /**
+     * Check if an existing constraint would satisfy a new version requirement.
+     * 
+     * This checks if the existing constraint is "good enough" compared to what we'd write.
+     * We always write caret constraints (^X.Y) for new packages, but existing packages
+     * might use other styles (tilde ~, exact, ranges, etc.).
+     *
+     * @param string $existing_constraint The existing version constraint (e.g., "^1.2", "~1.2.3", ">=1.2").
+     * @param string $new_constraint The new version constraint we would write (always ^X.Y format).
+     * @return bool True if the existing constraint is sufficient (no update needed).
+     */
+    private function constraint_satisfies( $existing_constraint, $new_constraint ) {
+        // Extract the target version from new constraint (always ^X.Y format)
+        $target_version = ltrim( $new_constraint, '^~><=! ' );
+        
+        // Caret (^) - allows changes that don't modify left-most non-zero digit
+        // ^1.2 means >=1.2.0 <2.0.0
+        if ( strpos( $existing_constraint, '^' ) === 0 ) {
+            $existing_version = ltrim( $existing_constraint, '^' );
+            // If existing ^X.Y >= target X.Y, it's satisfied
+            return version_compare( $existing_version, $target_version, '>=' );
+        }
+        
+        // Tilde (~) - allows patch-level changes
+        // ~1.2 means >=1.2.0 <1.3.0
+        // ~1.2.3 means >=1.2.3 <1.3.0
+        if ( strpos( $existing_constraint, '~' ) === 0 ) {
+            $existing_version = ltrim( $existing_constraint, '~' );
+            $existing_parts = explode( '.', $existing_version );
+            $target_parts = explode( '.', $target_version );
+            
+            // Check if major.minor match
+            if ( isset( $existing_parts[0], $existing_parts[1], $target_parts[0], $target_parts[1] ) ) {
+                if ( $existing_parts[0] === $target_parts[0] && 
+                     version_compare( $existing_parts[1], $target_parts[1], '>=' ) ) {
+                    return true;
+                }
+            }
+            return false;
+        }
+        
+        // Greater than or equal (>=, >, etc.)
+        if ( preg_match( '/^(>=?)\s*(.+)$/', $existing_constraint, $matches ) ) {
+            $operator = $matches[1];
+            $existing_version = $matches[2];
+            
+            if ( $operator === '>=' ) {
+                // If existing >=X.Y and X.Y >= target, it's satisfied
+                return version_compare( $existing_version, $target_version, '<=' );
+            } else if ( $operator === '>' ) {
+                // If existing >X.Y and X.Y > target, it's satisfied
+                return version_compare( $existing_version, $target_version, '<' );
+            }
+        }
+        
+        // Exact version match (no prefix)
+        if ( preg_match( '/^\d+\.\d+/', $existing_constraint ) && 
+             strpos( $existing_constraint, '*' ) === false &&
+             strpos( $existing_constraint, ' ' ) === false ) {
+            // Exact version - only satisfied if it's >= target
+            return version_compare( $existing_constraint, $target_version, '>=' );
+        }
+        
+        // For complex ranges (||, AND, ranges with spaces), wildcards, etc., 
+        // we can't easily determine - safer to not modify
         return true;
     }
 }
