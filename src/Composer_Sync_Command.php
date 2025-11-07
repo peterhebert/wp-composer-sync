@@ -109,11 +109,13 @@ class Composer_Sync_Command extends WP_CLI_Command {
             $slug = dirname( $plugin_file );
 
             if ( $slug === '.' ) {
+                // Single file MU-plugin - store filename without extension for matching
+                $filename = pathinfo( $plugin_file, PATHINFO_FILENAME );
                 $not_found[] = [
                     'name' => $plugin_data['Name'] . ' (single file)',
                     'version' => $plugin_data['Version'],
                     'type' => 'mu-plugin',
-                    'slug' => null
+                    'slug' => $filename
                 ];
                 continue;
             }
@@ -208,7 +210,7 @@ class Composer_Sync_Command extends WP_CLI_Command {
 
         if ( ! empty( $not_found ) ) {
             WP_CLI::warning( 'The following items could not be resolved and were omitted:' );
-            Utils\format_items( 'table', $not_found, [ 'name', 'version', 'type' ] );
+            Utils\format_items( 'table', $not_found, [ 'name', 'version', 'type', 'slug' ] );
         }
     }
 
@@ -347,10 +349,16 @@ class Composer_Sync_Command extends WP_CLI_Command {
         if ( count( $potential_matches ) === 1 ) {
             $package = $potential_matches[0];
             
+            // Check if this is a single-file MU-plugin (indicated by "(single file)" in the name)
+            $is_single_file = strpos( $item['name'], '(single file)' ) !== false;
+            
             WP_CLI::log( '' );
             WP_CLI::log( WP_CLI::colorize( "%YPotential match found:%n" ) );
             WP_CLI::log( "  {$type}: {$item['name']} (v{$item['version']})" );
             WP_CLI::log( "  Package: {$package}" );
+            if ( $is_single_file ) {
+                WP_CLI::log( WP_CLI::colorize( "  %RNote: This is a single-file MU-plugin%n" ) );
+            }
             
             try {
                 WP_CLI::confirm( 'Use this package?' );
