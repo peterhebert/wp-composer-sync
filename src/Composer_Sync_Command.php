@@ -188,10 +188,23 @@ class Composer_Sync_Command extends WP_CLI_Command {
         $not_found = $still_not_found;
 
         $final_json = $composer_json;
-        $final_json['require'] = array_merge(
-            $composer_json['require'] ?? [],
-            $new_requires
-        );
+        
+        // Merge requires, but preserve existing constraints if they satisfy the new version
+        $merged_requires = $composer_json['require'] ?? [];
+        foreach ( $new_requires as $package => $new_version ) {
+            if ( isset( $merged_requires[ $package ] ) ) {
+                // Package exists - only update if existing constraint doesn't satisfy
+                if ( ! $this->constraint_satisfies( $merged_requires[ $package ], $new_version ) ) {
+                    $merged_requires[ $package ] = $new_version;
+                }
+                // Otherwise keep the existing constraint
+            } else {
+                // New package - add it
+                $merged_requires[ $package ] = $new_version;
+            }
+        }
+        
+        $final_json['require'] = $merged_requires;
 
         $existing_repos_map = [];
         foreach ( $composer_json['repositories'] ?? [] as $repo ) {
