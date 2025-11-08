@@ -250,7 +250,7 @@ class Composer_Sync_Command extends WP_CLI_Command {
         $version_constraint = ( $type === 'mu-plugin' ) ? $minor_version : "^{$minor_version}";
 
         // --- 1. Check Hard-Coded "Pro" Map ---
-        $pro_repo = $this->check_known_pro_repos( $name );
+        $pro_repo = $this->check_known_pro_repos( $name, $slug );
         if ( $pro_repo ) {
             return [ $pro_repo['package'], $version_constraint, $pro_repo['repository'] ];
         }
@@ -295,9 +295,10 @@ class Composer_Sync_Command extends WP_CLI_Command {
      * Helper to check against a map of known private/pro repos.
      *
      * @param string $name The display name of the plugin/theme.
+     * @param string $slug The directory slug of the plugin/theme.
      * @return array|null Repository config if found, null otherwise.
      */
-    private function check_known_pro_repos( $name ) {
+    private function check_known_pro_repos( $name, $slug = null ) {
         // Try to load from external manifest (custom first, then .default.json)
         $base_dir = dirname( __DIR__ );
         $manifest_file = null;
@@ -311,7 +312,7 @@ class Composer_Sync_Command extends WP_CLI_Command {
         if ( $manifest_file ) {
             $manifest_data = json_decode( file_get_contents( $manifest_file ), true );
             if ( $manifest_data && isset( $manifest_data['repositories'] ) ) {
-                return $this->match_plugin_to_repo( $name, $manifest_data['repositories'] );
+                return $this->match_plugin_to_repo( $name, $slug, $manifest_data['repositories'] );
             }
         }
         
@@ -326,24 +327,52 @@ class Composer_Sync_Command extends WP_CLI_Command {
             ],
         ];
 
-        return $this->match_plugin_to_repo( $name, $known_repos );
+        return $this->match_plugin_to_repo( $name, $slug, $known_repos );
     }
 
     /**
      * Match a plugin name to a repository and return package info.
      *
      * @param string $plugin_name The display name of the plugin.
+     * @param string $plugin_slug The directory slug of the plugin.
      * @param array  $repositories Array of repository configurations with plugins.
      * @return array|null Repository config with package if found, null otherwise.
      */
-    private function match_plugin_to_repo( $plugin_name, $repositories ) {
+    private function match_plugin_to_repo( $plugin_name, $plugin_slug, $repositories ) {
         foreach ( $repositories as $repo ) {
             if ( ! isset( $repo['plugins'] ) || ! is_array( $repo['plugins'] ) ) {
                 continue;
             }
             
-            foreach ( $repo['plugins'] as $name => $package ) {
+            foreach ( $repo['plugins'] as $name => $package_info ) {
+                $package = null;
+                $expected_slug = null;
+                
+                // Handle both formats: simple string or object with package/slug
+                if ( is_string( $package_info ) ) {
+                    // Simple format: "Plugin Name": "vendor/package"
+                    $package = $package_info;
+                } elseif ( is_array( $package_info ) && isset( $package_info['package'] ) ) {
+                    // Extended format: "Plugin Name": {"package": "vendor/package", "slug": "actual-slug"}
+                    $package = $package_info['package'];
+                    $expected_slug = $package_info['slug'] ?? null;
+                } else {
+                    continue;
+                }
+                
+                // Try to match by name first
                 if ( $name === $plugin_name ) {
+                    return [
+                        'package' => $package,
+                        'repository' => [
+                            'type' => $repo['type'] ?? 'composer',
+                            'url' => $repo['url'],
+                        ],
+                    ];
+                }
+                
+                // If name didn't match but slug is provided, try matching by slug
+                if ( $plugin_slug && $expected_slug && $plugin_slug === $expected_slug ) {
                     return [
                         'package' => $package,
                         'repository' => [

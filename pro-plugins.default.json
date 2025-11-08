@@ -7,51 +7,100 @@
       "url": "https://connect.advancedcustomfields.com",
       "type": "composer",
       "plugins": {
-        "Advanced Custom Fields Pro": "advanced-custom-fields/advanced-custom-fields-pro"
+        "Advanced Custom Fields Pro": "wpengine/advanced-custom-fields-pro"
+      }
+    },
+    {
+      "url": "https://composer.deliciousbrains.com",
+      "type": "composer",
+      "plugins": {
+        "WP Migrate DB Pro": "deliciousbrains-plugin/wp-migrate-db-pro",
+        "WP Migrate DB Pro CLI": "deliciousbrains-plugin/wp-migrate-db-pro-cli",
+        "WP Migrate DB Pro Media Files": "deliciousbrains-plugin/wp-migrate-db-pro-media-files",
+        "WP Migrate DB Pro Multisite Tools": "deliciousbrains-plugin/wp-migrate-db-pro-multisite-tools",
+        "WP Migrate DB Pro Theme & Plugin Files": "deliciousbrains-plugin/wp-migrate-db-pro-theme-plugin-files",
+        "WP Offload Media": "deliciousbrains-plugin/wp-offload-media",
+        "WP Offload Media - Assets Pull Addon": "deliciousbrains-plugin/wp-offload-media-assets-pull",
+        "WP Offload SES": "deliciousbrains-plugin/wp-offload-ses"
       }
     },
     {
       "url": "https://composer.gravityforms.com",
       "type": "composer",
-      "note": "All Gravity Forms plugins use the format: gravityforms/{slug}",
+      "note": "All Gravity Forms plugins use the format: gravity/{slug}",
       "plugins": {
-        "Gravity Forms": "gravityforms/gravityforms",
-        "Gravity Forms CLI": "gravityforms/gravityformscli",
-        "Gravity Forms Signature Add-On": "gravityforms/gravityformssignature",
-        "Gravity Forms Survey Add-On": "gravityforms/gravityformssurvey",
-        "Gravity Forms Quiz Add-On": "gravityforms/gravityformsquiz",
-        "Gravity Forms Polls Add-On": "gravityforms/gravityformspolls",
-        "Gravity Forms User Registration Add-On": "gravityforms/gravityformsuserregistration",
-        "Gravity Forms Zapier Add-On": "gravityforms/gravityformszapier",
-        "Gravity Forms PayPal Add-On": "gravityforms/gravityformspaypal",
-        "Gravity Forms Stripe Add-On": "gravityforms/gravityformsstripe",
-        "Gravity Forms Square Add-On": "gravityforms/gravityformssquare",
-        "Gravity Forms Authorize.Net Add-On": "gravityforms/gravityformsauthorizenet",
-        "Gravity Forms PayPal Checkout Add-On": "gravityforms/gravityformspaypalcheckout",
-        "Gravity Forms AWeber Add-On": "gravityforms/gravityformsaweber",
-        "Gravity Forms Campaign Monitor Add-On": "gravityforms/gravityformscampaignmonitor",
-        "Gravity Forms Emma Add-On": "gravityforms/gravityformsemma",
-        "Gravity Forms GetResponse Add-On": "gravityforms/gravityformsgetresponse",
-        "Gravity Forms iContact Add-On": "gravityforms/gravityformsicontact",
-        "Gravity Forms Mad Mimi Add-On": "gravityforms/gravityformsmadmimi",
-        "Gravity Forms Mailchimp Add-On": "gravityforms/gravityformsmailchimp",
-        "Gravity Forms ActiveCampaign Add-On": "gravityforms/gravityformsactivecampaign",
-        "Gravity Forms Agile CRM Add-On": "gravityforms/gravityformsagilecrm",
-        "Gravity Forms Breeze Add-On": "gravityforms/gravityformsbreeze",
-        "Gravity Forms Capsule Add-On": "gravityforms/gravityformscapsule",
-        "Gravity Forms Freshbooks Add-On": "gravityforms/gravityformsfreshbooks",
-        "Gravity Forms Help Scout Add-On": "gravityforms/gravityformshelpscout",
-        "Gravity Forms Highrise Add-On": "gravityforms/gravityformshighrise",
-        "Gravity Forms HubSpot Add-On": "gravityforms/gravityformshubspot",
-        "Gravity Forms Pardot Add-On": "gravityforms/gravityformspardot",
-        "Gravity Forms Salesforce Add-On": "gravityforms/gravityformssalesforce",
-        "Gravity Forms Trello Add-On": "gravityforms/gravityformstrello",
-        "Gravity Forms Zoho CRM Add-On": "gravityforms/gravityformszohocrm",
-        "Gravity Forms Slack Add-On": "gravityforms/gravityformsslack",
-        "Gravity Forms Dropbox Add-On": "gravityforms/gravityformsdropbox",
-        "Gravity Forms WebHooks Add-On": "gravityforms/gravityformswebhooks",
-        "Gravity Forms Partial Entries Add-On": "gravityforms/gravityformspartialentries",
-        "Gravity Forms Coupons Add-On": "gravityforms/gravityformscoupons"
+        "Gravity Forms": "gravity/gravityforms",
+        "Gravity Forms CLI": "gravity/gravityformscli",
+        "Gravity Forms Signature Add-On": "gravity/gravityformssignature",
+        "Gravity Forms Survey Add-On": "gravity/gravityformssurvey",
+        "Gravity Forms Quiz Add-On": "gravity/gravityformsquiz",
+        "Gravity Forms Polls Add-On": "gravity/gravityformspolls",
+        "Gravity Forms User Registration Add-On": "gravity/gravityformsuserregistration",
+        "Gravity Forms Zapier Add-On": "gravity/gravityformszapier",
+        "Gravity Forms PayPal Add-On": "gravity/gravityformspaypal",
+        "Gravity Forms Stripe Add-On": "gravity/gravityformsstripe",
+        "Gravity Forms Square Add-On": "gravity/gravityformssquare",
+        "Gravity Forms Authorize.Net Add-On": "gravity/gravityformsauthorizenet",
+        "Gravity Forms PayPal Checkout Add-On": "gravity/gravityformspaypalcheckout",
+        "Gravity Forms AWeber Add-On": "gravity/gravityformsaweber",
+        "Gravity Forms Campaign Monitor Add-On": "gravity/gravityformscampaignmonitor",
+        "Gravity Forms Emma Add-On": "gravity/gravityformsemma",
+        "Gravity Forms GetResponse Add-On": "gravity/gravityformsgetresponse",
+        "Gravity Forms iContact Add-On": "gravity/gravityformsicontact",
+        "Gravity Forms Mad Mimi Add-On": "gravity/gravityformsmadmimi",
+        "Gravity Forms Mailchimp Add-On": "gravity/gravityformsmailchimp",
+        "Gravity Forms ActiveCampaign Add-On": "gravity/gravityformsactivecampaign",
+        "Gravity Forms Agile CRM Add-On": "gravity/gravityformsagilecrm",
+        "Gravity Forms Breeze Add-On": "gravity/gravityformsbreeze",
+        "Gravity Forms Capsule Add-On": "gravity/gravityformscapsule",
+        "Gravity Forms Freshbooks Add-On": "gravity/gravityformsfreshbooks",
+        "Gravity Forms Help Scout Add-On": "gravity/gravityformshelpscout",
+        "Gravity Forms Highrise Add-On": "gravity/gravityformshighrise",
+        "Gravity Forms HubSpot Add-On": "gravity/gravityformshubspot",
+        "Gravity Forms Pardot Add-On": "gravity/gravityformspardot",
+        "Gravity Forms Salesforce Add-On": "gravity/gravityformssalesforce",
+        "Gravity Forms Trello Add-On": "gravity/gravityformstrello",
+        "Gravity Forms Zoho CRM Add-On": "gravity/gravityformszohocrm",
+        "Gravity Forms Slack Add-On": "gravity/gravityformsslack",
+        "Gravity Forms Dropbox Add-On": "gravity/gravityformsdropbox",
+        "Gravity Forms WebHooks Add-On": "gravity/gravityformswebhooks",
+        "Gravity Forms Partial Entries Add-On": "gravity/gravityformspartialentries",
+        "Gravity Forms Coupons Add-On": "gravity/gravityformscoupons"
+      }
+    },
+    {
+      "url": "https://deliciousbrains.com/composer",
+      "type": "composer",
+      "note": "Delicious Brains plugins use historical slug names that don't match current branding",
+      "plugins": {
+        "WP Offload Media Lite": {
+          "package": "deliciousbrains/wp-amazon-s3-and-cloudfront",
+          "slug": "amazon-s3-and-cloudfront"
+        },
+        "WP Offload Media": {
+          "package": "deliciousbrains/wp-amazon-s3-and-cloudfront-pro",
+          "slug": "amazon-s3-and-cloudfront-pro"
+        },
+        "WP Offload Media - Assets Pull Addon": {
+          "package": "deliciousbrains/wp-amazon-s3-and-cloudfront-assets-pull",
+          "slug": "amazon-s3-and-cloudfront-assets-pull"
+        },
+        "WP Migrate DB Pro": {
+          "package": "deliciousbrains/wp-migrate-db-pro",
+          "slug": "wp-migrate-db-pro"
+        },
+        "WP Migrate DB Pro Media Files": {
+          "package": "deliciousbrains/wp-migrate-db-pro-media-files",
+          "slug": "wp-migrate-db-pro-media-files"
+        },
+        "WP Migrate DB Pro Multisite Tools": {
+          "package": "deliciousbrains/wp-migrate-db-pro-multisite-tools",
+          "slug": "wp-migrate-db-pro-multisite-tools"
+        },
+        "WP Migrate DB Pro Theme & Plugin Files": {
+          "package": "deliciousbrains/wp-migrate-db-pro-theme-plugin-files",
+          "slug": "wp-migrate-db-pro-theme-plugin-files"
+        }
       }
     }
   ]

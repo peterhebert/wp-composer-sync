@@ -125,8 +125,18 @@ The package includes a manifest file for known premium plugins. You can customiz
          "url": "https://composer.gravityforms.com",
          "type": "composer",
          "plugins": {
-           "Gravity Forms": "gravityforms/gravityforms",
-           "Gravity Forms Stripe Add-On": "gravityforms/gravityformsstripe"
+           "Gravity Forms": "gravity/gravityforms",
+           "Gravity Forms Stripe Add-On": "gravity/gravityformsstripe"
+         }
+       },
+       {
+         "url": "https://deliciousbrains.com/composer",
+         "type": "composer",
+         "plugins": {
+           "WP Offload Media": {
+             "package": "deliciousbrains/wp-amazon-s3-and-cloudfront-pro",
+             "slug": "amazon-s3-and-cloudfront-pro"
+           }
          }
        },
        {
@@ -139,6 +149,11 @@ The package includes a manifest file for known premium plugins. You can customiz
      ]
    }
    ```
+
+**Manifest format options:**
+
+- **Simple format**: `"Plugin Name": "vendor/package"` - Use when plugin name and slug match
+- **Extended format**: `"Plugin Name": {"package": "vendor/package", "slug": "actual-slug"}` - Use when the directory slug differs from the display name (common with rebranded plugins)
 
 **Benefits of the repository-first structure:**
 
