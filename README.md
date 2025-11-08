@@ -108,7 +108,15 @@ Apply these changes? [y/n] y
 
 ## Adding Custom Premium Plugins
 
-The package includes a manifest file for known premium plugins. You can customize it for your needs:
+The package includes a manifest file (`pro-plugins.default.json`) with commonly used premium plugins like Advanced Custom Fields Pro, Gravity Forms, and Delicious Brains products.
+
+**You only need to create a custom `pro-plugins.json` if:**
+
+- Your premium plugin is not in the default manifest
+- You want to add additional repositories or packages
+- You need to override the default configuration
+
+To customize:
 
 1. Copy the example manifest:
 
