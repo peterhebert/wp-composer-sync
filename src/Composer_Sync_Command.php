@@ -190,16 +190,24 @@ class Composer_Sync_Command extends WP_CLI_Command {
         $final_json = $composer_json;
         
         // Merge requires, but preserve existing constraints if they satisfy the new version
+        // Also check require-dev to avoid duplicates
         $merged_requires = $composer_json['require'] ?? [];
+        $existing_require_dev = $composer_json['require-dev'] ?? [];
+        
         foreach ( $new_requires as $package => $new_version ) {
+            // Check if package is already in require-dev - if so, skip it
+            if ( isset( $existing_require_dev[ $package ] ) ) {
+                continue;
+            }
+            
             if ( isset( $merged_requires[ $package ] ) ) {
-                // Package exists - only update if existing constraint doesn't satisfy
+                // Package exists in require - only update if existing constraint doesn't satisfy
                 if ( ! $this->constraint_satisfies( $merged_requires[ $package ], $new_version ) ) {
                     $merged_requires[ $package ] = $new_version;
                 }
                 // Otherwise keep the existing constraint
             } else {
-                // New package - add it
+                // New package - add it to require
                 $merged_requires[ $package ] = $new_version;
             }
         }
