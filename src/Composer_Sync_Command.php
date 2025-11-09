@@ -246,14 +246,12 @@ class Composer_Sync_Command extends WP_CLI_Command {
      * ## EXAMPLES
      *
      *     # Copy manifest to current directory
-     *     $ wp composer sync init-manifest
+     *     $ wp composer init-manifest
      *
      *     # Copy manifest to specific path
-     *     $ wp composer sync init-manifest /path/to/project
-     *
-     * @subcommand init-manifest
+     *     $ wp composer init-manifest /path/to/project
      */
-    public function init_manifest( $args, $assoc_args ) {
+    public static function init_manifest( $args, $assoc_args ) {
         $target_dir = isset( $args[0] ) ? rtrim( $args[0], '/' ) : getcwd();
         $target_file = $target_dir . '/repositories-packages.json';
         

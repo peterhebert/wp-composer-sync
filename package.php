@@ -20,5 +20,6 @@ if ( ! class_exists( 'PeterHebert\WPComposerSync\Composer_Sync_Command' ) ) {
 	require_once __DIR__ . '/src/Composer_Sync_Command.php';
 }
 
-// Register the command
+// Register the commands
 WP_CLI::add_command( 'composer sync', 'PeterHebert\WPComposerSync\Composer_Sync_Command' );
+WP_CLI::add_command( 'composer init-manifest', 'PeterHebert\WPComposerSync\Composer_Sync_Command::init_manifest' );

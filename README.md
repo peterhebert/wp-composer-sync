@@ -124,7 +124,7 @@ The command will:
 **Initialize custom manifest for premium plugins:**
 
 ```bash
-wp composer sync init-manifest [<path>]
+wp composer init-manifest [<path>]
 ```
 
 Copies the default premium plugin manifest to your project root (or specified path) so you can customize it with your own premium plugin repositories. See [Adding Custom Premium Plugins](#adding-custom-premium-plugins) below.
@@ -204,7 +204,7 @@ You only need to create a custom `repositories-packages.json` if:
 Use the built-in WP-CLI command to copy the default manifest to your project root:
 
 ```bash
-wp composer sync init-manifest
+wp composer init-manifest
 ```
 
 This will copy `repositories-packages.default.json` to `repositories-packages.json` in your current directory (or specify a path as an argument).
