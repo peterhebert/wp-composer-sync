@@ -35,7 +35,7 @@ class Init_Manifest_Command extends WP_CLI_Command {
      */
     public function __invoke( $args, $assoc_args ) {
         $target_dir = isset( $args[0] ) ? rtrim( $args[0], '/' ) : getcwd();
-        $target_file = $target_dir . '/repositories-packages.json';
+        $target_file = $target_dir . '/repositories.json';
         
         if ( file_exists( $target_file ) ) {
             WP_CLI::error( "File already exists: {$target_file}" );
@@ -43,7 +43,7 @@ class Init_Manifest_Command extends WP_CLI_Command {
         
         // Find the default manifest in the package directory
         $package_dir = dirname( __DIR__ );
-        $source_file = $package_dir . '/repositories-packages.default.json';
+        $source_file = $package_dir . '/repositories.default.json';
         
         if ( ! file_exists( $source_file ) ) {
             WP_CLI::error( "Default manifest not found: {$source_file}" );

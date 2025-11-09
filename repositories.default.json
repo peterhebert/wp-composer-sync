@@ -1,12 +1,12 @@
 {
   "$schema": "https://json-schema.org/draft-07/schema#",
   "title": "Premium WordPress Plugins Repository Manifest",
-  "description": "Configuration for known premium WordPress plugins and their composer repositories. Copy this file to 'repositories-packages.json' and customize for your needs.",
+  "description": "Configuration for known premium WordPress plugins and their composer repositories. Copy this file to 'repositories.json' and customize for your needs.",
   "repositories": [
     {
       "url": "https://connect.advancedcustomfields.com",
       "type": "composer",
-      "plugins": {
+      "packages": {
         "Advanced Custom Fields Pro": "wpengine/advanced-custom-fields-pro"
       }
     },
@@ -14,7 +14,7 @@
       "url": "https://composer.gravityforms.com",
       "type": "composer",
       "note": "All Gravity Forms plugins use the format: gravity/{slug}",
-      "plugins": {
+      "packages": {
         "Gravity Forms": "gravity/gravityforms",
         "Gravity Forms CLI": "gravity/gravityformscli",
         "Gravity Forms Signature Add-On": "gravity/gravityformssignature",
@@ -58,7 +58,7 @@
       "url": "https://deliciousbrains.com/composer",
       "type": "composer",
       "note": "Delicious Brains plugins use historical slug names that don't match current branding",
-      "plugins": {
+      "packages": {
         "WP Offload Media Lite": {
           "package": "deliciousbrains/wp-amazon-s3-and-cloudfront",
           "slug": "amazon-s3-and-cloudfront"

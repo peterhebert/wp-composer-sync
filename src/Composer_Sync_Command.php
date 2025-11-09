@@ -313,14 +313,14 @@ class Composer_Sync_Command extends WP_CLI_Command {
         
         // Check project root first (where composer.json lives)
         $project_root = getcwd();
-        if ( file_exists( $project_root . '/repositories-packages.json' ) ) {
-            $manifest_file = $project_root . '/repositories-packages.json';
+        if ( file_exists( $project_root . '/repositories.json' ) ) {
+            $manifest_file = $project_root . '/repositories.json';
         } 
         // Fall back to package's default manifest
         else {
             $package_dir = dirname( __DIR__ );
-            if ( file_exists( $package_dir . '/repositories-packages.default.json' ) ) {
-                $manifest_file = $package_dir . '/repositories-packages.default.json';
+            if ( file_exists( $package_dir . '/repositories.default.json' ) ) {
+                $manifest_file = $package_dir . '/repositories.default.json';
             }
         }
         
@@ -336,7 +336,7 @@ class Composer_Sync_Command extends WP_CLI_Command {
             [
                 'url' => 'https://connect.advancedcustomfields.com',
                 'type' => 'composer',
-                'plugins' => [
+                'packages' => [
                     'Advanced Custom Fields Pro' => 'advanced-custom-fields/advanced-custom-fields-pro',
                 ],
             ],
@@ -346,20 +346,20 @@ class Composer_Sync_Command extends WP_CLI_Command {
     }
 
     /**
-     * Match a plugin name to a repository and return package info.
+     * Match a plugin/theme name to a repository and return package info.
      *
-     * @param string $plugin_name The display name of the plugin.
-     * @param string $plugin_slug The directory slug of the plugin.
-     * @param array  $repositories Array of repository configurations with plugins.
+     * @param string $plugin_name The display name of the plugin/theme.
+     * @param string $plugin_slug The directory slug of the plugin/theme.
+     * @param array  $repositories Array of repository configurations with packages.
      * @return array|null Repository config with package if found, null otherwise.
      */
     private function match_plugin_to_repo( $plugin_name, $plugin_slug, $repositories ) {
         foreach ( $repositories as $repo ) {
-            if ( ! isset( $repo['plugins'] ) || ! is_array( $repo['plugins'] ) ) {
+            if ( ! isset( $repo['packages'] ) || ! is_array( $repo['packages'] ) ) {
                 continue;
             }
             
-            foreach ( $repo['plugins'] as $name => $package_info ) {
+            foreach ( $repo['packages'] as $name => $package_info ) {
                 $package = null;
                 $expected_slug = null;
                 

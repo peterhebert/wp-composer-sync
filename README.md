@@ -189,11 +189,11 @@ Apply these changes? [y/n] y
 
 ## Adding Custom Premium Plugins
 
-The package includes a default manifest file (`repositories-packages.default.json`) with commonly used premium package repositories from Advanced Custom Fields, Gravity Forms, and Delicious Brains.
+The package includes a default manifest file (`repositories.default.json`) with commonly used premium package repositories from Advanced Custom Fields, Gravity Forms, and Delicious Brains.
 
 ### When to Create a Custom Manifest
 
-You only need to create a custom `repositories-packages.json` if:
+You only need to create a custom `repositories.json` if:
 
 - Your premium plugin is not in the default manifest
 - You want to add additional repositories or packages
@@ -207,9 +207,9 @@ Use the built-in WP-CLI command to copy the default manifest to your project roo
 wp composer init-manifest
 ```
 
-This will copy `repositories-packages.default.json` to `repositories-packages.json` in your current directory (or specify a path as an argument).
+This will copy `repositories.default.json` to `repositories.json` in your current directory (or specify a path as an argument).
 
-Once copied, edit `repositories-packages.json` to add your premium plugin repositories:
+Once copied, edit `repositories.json` to add your premium plugin repositories:
 
    ```json
    {
@@ -217,7 +217,7 @@ Once copied, edit `repositories-packages.json` to add your premium plugin reposi
        {
          "url": "https://composer.gravityforms.com",
          "type": "composer",
-         "plugins": {
+         "packages": {
            "Gravity Forms": "gravity/gravityforms",
            "Gravity Forms Stripe Add-On": "gravity/gravityformsstripe"
          }
@@ -225,7 +225,7 @@ Once copied, edit `repositories-packages.json` to add your premium plugin reposi
        {
          "url": "https://deliciousbrains.com/composer",
          "type": "composer",
-         "plugins": {
+         "packages": {
            "WP Offload Media": {
              "package": "deliciousbrains/wp-amazon-s3-and-cloudfront-pro",
              "slug": "amazon-s3-and-cloudfront-pro"
@@ -235,7 +235,7 @@ Once copied, edit `repositories-packages.json` to add your premium plugin reposi
        {
          "url": "https://your-plugin-repo.com",
          "type": "composer",
-         "plugins": {
+         "packages": {
            "Your Plugin Name": "vendor/package-name"
          }
        }
@@ -245,12 +245,12 @@ Once copied, edit `repositories-packages.json` to add your premium plugin reposi
 
 **Manifest format options:**
 
-- **Simple format**: `"Plugin Name": "vendor/package"` - Use when plugin name and slug match
-- **Extended format**: `"Plugin Name": {"package": "vendor/package", "slug": "actual-slug"}` - Use when the directory slug differs from the display name (common with rebranded plugins)
+- **Simple format**: `"Package Name": "vendor/package"` - Use when package name and slug match
+- **Extended format**: `"Package Name": {"package": "vendor/package", "slug": "actual-slug"}` - Use when the directory slug differs from the display name (common with rebranded plugins)
 
 **Benefits of the repository-first structure:**
 
-- No repetition - define the repository URL once for multiple plugins
+- No repetition - define the repository URL once for multiple packages
 - Easy to add entire product families (Gravity Forms, WP Migrate, etc.)
 - Maintainable - edit JSON instead of PHP code
 
@@ -258,8 +258,8 @@ Once copied, edit `repositories-packages.json` to add your premium plugin reposi
 
 The command checks for manifests in this priority order:
 
-1. **Project root** - `repositories-packages.json` (your custom manifest)
-2. **Package default** - `repositories-packages.default.json` (included with this package)
+1. **Project root** - `repositories.json` (your custom manifest)
+2. **Package default** - `repositories.default.json` (included with this package)
 3. **Hardcoded fallback** - Minimal ACF Pro support if no manifests found
 
 This means your custom manifest completely overrides the default, so make sure to include any default plugins you still need when creating your custom version.
