@@ -262,9 +262,10 @@ The command checks for manifests in this priority order:
 
 1. **Project root** - `repositories.json` (your custom manifest)
 2. **Package default** - `repositories.default.json` (included with this package)
-3. **Hardcoded fallback** - Minimal ACF Pro support if no manifests found
 
-This means your custom manifest completely overrides the default, so make sure to include any default plugins you still need when creating your custom version.
+If no manifest is found, the package falls back to normal resolution (local composer.json files and WPackagist).
+
+**Note:** Your custom manifest completely overrides the default, so make sure to include any default plugins you still need when creating your custom version.
 
 ## Requirements
 

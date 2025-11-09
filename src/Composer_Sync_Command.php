@@ -331,18 +331,8 @@ class Composer_Sync_Command extends WP_CLI_Command {
             }
         }
         
-        // Fallback to minimal hardcoded repos if no manifest
-        $known_repos = [
-            [
-                'url' => 'https://connect.advancedcustomfields.com',
-                'type' => 'composer',
-                'packages' => [
-                    'Advanced Custom Fields Pro' => 'advanced-custom-fields/advanced-custom-fields-pro',
-                ],
-            ],
-        ];
-
-        return $this->match_plugin_to_repo( $name, $slug, $known_repos );
+        // No manifest found - return null to fall through to normal resolution (WPackagist, etc.)
+        return null;
     }
 
     /**
