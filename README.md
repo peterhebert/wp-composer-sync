@@ -1,6 +1,8 @@
 # WP Composer Sync
 
-A WP-CLI command to scan an existing WordPress site and sync active plugins, themes, and WordPress core as dependencies into `composer.json`.
+A WP-CLI command to scan an existing WordPress site and sync active plugins, themes, and WordPress core as dependencies into `composer.json`. 
+
+This tool is meant primarlity for converting your WordPress site to use COmposer for managing dependencies. It can also be used for sites where users can manage their own plugins in the dashboard, but you want to keep your `composer.json` file up to date.
 
 ## Features
 
