@@ -15,11 +15,14 @@ if ( file_exists( $autoloader ) ) {
 	require_once $autoloader;
 }
 
-// Manually load the command class if autoloader isn't available
+// Manually load the command classes if autoloader isn't available
 if ( ! class_exists( 'PeterHebert\WPComposerSync\Composer_Sync_Command' ) ) {
 	require_once __DIR__ . '/src/Composer_Sync_Command.php';
+}
+if ( ! class_exists( 'PeterHebert\WPComposerSync\Init_Manifest_Command' ) ) {
+	require_once __DIR__ . '/src/Init_Manifest_Command.php';
 }
 
 // Register the commands
 WP_CLI::add_command( 'composer sync', 'PeterHebert\WPComposerSync\Composer_Sync_Command' );
-WP_CLI::add_command( 'composer init-manifest', 'PeterHebert\WPComposerSync\Composer_Sync_Command::init_manifest' );
+WP_CLI::add_command( 'composer init-manifest', 'PeterHebert\WPComposerSync\Init_Manifest_Command' );
