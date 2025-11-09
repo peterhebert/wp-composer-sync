@@ -6,16 +6,85 @@ A WP-CLI command to scan an existing WordPress site and sync active plugins, the
 
 - 🔍 **Scans your WordPress installation** for core version, active plugins, themes, and must-use plugins
 - 📦 **Resolves packages** from multiple sources:
-  - Known premium plugins (e.g., ACF Pro) with their composer repositories
-  - Plugins/themes with local `composer.json` files
   - WordPress.org plugins/themes via [Wpackagist](https://wpackagist.org)
+  - Known premium plugins (e.g., Advanced Custom Fields Pro, Delicious Brains, Gravity Forms, etc) with their own composer repositories
   - Existing packages in your `composer.json` (matches by slug)
-- 🎯 **Smart WordPress package handling** - Preserves existing `roots/wordpress` or `johnpbloch/wordpress`, defaults to `roots/wordpress` for new projects
-- 🔄 **Intelligent version constraints** - Uses major.minor versions (e.g., `^6.7`) and only updates when major version changes
-- 🤝 **Interactive matching** - Prompts to confirm matches between installed plugins/themes and existing composer packages
+- 🎯 **WordPress core package handling** - Preserves existing `roots/wordpress` or `johnpbloch/wordpress`, defaults to `roots/wordpress` for new projects
+- 🔄 **Intelligent version constraints** - Uses major.minor versions (e.g., `^6.7`) and only updates your `composer.json` on a major version change
+- 🤝 **Interactive matching** - Prompts to confirm matches between installed plugins/themes and existing composer dependencies
 - ✅ **Shows a diff** of proposed changes before updating
 - 🤔 **Asks for confirmation** before modifying your `composer.json`
 - ⚠️ **Reports unresolvable items** in a table for manual handling
+
+
+## Setting Up Composer for WordPress
+
+If you don't already have a `composer.json` file in your WordPress installation, you'll need to set up Composer for WordPress, before using this WP-CLI command. Here's how:
+
+### 1. Initialize Composer
+
+```bash
+composer init --name=vendor-name/project-name --type=project
+```
+
+You can read more about [`composer init`](https://getcomposer.org/doc/03-cli.md#init) and  [package naming](https://getcomposer.org/doc/01-basic-usage.md#package-names) in the Composer documentation.
+
+### 2. Add composer/installers
+
+The `composer/installers` package will faciliate installing packages to the correct location based on the specified package type. It has support for WordPress package types: `wordpress-plugin`, `wordpress-theme`, `wordpress-muplugin`, and `wordpress-dropin`.
+
+```bash
+composer require composer/installers
+```
+
+### 3. Add WPackagist Repository
+
+[WPackagist](https://wpackagist.org) mirrors the WordPress plugin and theme directories as a Composer repository.
+
+```bash
+composer config repositories.wpackagist composer https://wpackagist.org
+```
+
+### 4. Configure Install Paths
+
+Add the `extra` section to your `composer.json` to specify where WordPress core, plugins, and themes should be installed.
+
+**Example A - WordPress installed in the project root:**
+
+```json
+{
+  "extra": {
+    "wordpress-install-dir": ".",
+    "installer-paths": {
+      "wp-content/plugins/{$name}/": ["type:wordpress-plugin"],
+      "wp-content/mu-plugins/{$name}/": ["type:wordpress-muplugin"],
+      "wp-content/themes/{$name}/": ["type:wordpress-theme"]
+    }
+  }
+}
+```
+
+**Example B - A subdirectory `web` as the public web root - based on [Bedrock](https://roots.io/bedrock/):**
+
+```json
+{
+  "extra": {
+    "wordpress-install-dir": "web/wp",
+    "installer-paths": {
+      "web/app/plugins/{$name}/": ["type:wordpress-plugin"],
+      "web/app/mu-plugins/{$name}/": ["type:wordpress-muplugin"],
+      "web/app/themes/{$name}/": ["type:wordpress-theme"]
+    }
+  }
+}
+```
+
+The `wordpress-install-dir` setting determines where WordPress core will be installed when you manage WordPress core as a dependency via packages like `roots/wordpress` or `johnpbloch/wordpress`.
+
+For more on managing WordPress with Composer, see:
+
+- [Managing Your WordPress Site With Git and Composer](https://deliciousbrains.com/storing-wordpress-in-git/)
+- Roots [Bedrock](https://roots.io/bedrock/)
 
 ## Installation
 
@@ -30,9 +99,10 @@ A WP-CLI command to scan an existing WordPress site and sync active plugins, the
       - vendor/peterhebert/wp-composer-sync
     ```
 
+
 ## Usage
 
-From your project's root directory (where `composer.json` exists), run:
+Once your `composer.json` is configured, run this command to sync it with your WordPress installation's plugins and themes:
 
 ```bash
 wp composer sync
@@ -49,6 +119,16 @@ The command will:
 7. Update `composer.json` if confirmed
 8. Report any items that couldn't be resolved
 
+### Additional Commands
+
+**Initialize custom manifest for premium plugins:**
+
+```bash
+wp composer sync init-manifest [<path>]
+```
+
+Copies the default premium plugin manifest to your project root (or specified path) so you can customize it with your own premium plugin repositories. See [Adding Custom Premium Plugins](#adding-custom-premium-plugins) below.
+
 ## Version Constraint Behavior
 
 The command uses **intelligent version constraints** to minimize unnecessary updates:
@@ -59,6 +139,7 @@ The command uses **intelligent version constraints** to minimize unnecessary upd
   - Existing: `^5.3`, Installed: `5.5.1` → No update (same major version)
   - Existing: `^5.3`, Installed: `6.0.1` → Updates to `^6.0` (major version changed)
 - **MU-plugins**: Use exact versions (e.g., `1.2`) instead of caret constraints
+- **require-dev**: Packages in `require-dev` are preserved and not moved to `require`
 
 ## Package Matching
 
@@ -108,23 +189,27 @@ Apply these changes? [y/n] y
 
 ## Adding Custom Premium Plugins
 
-The package includes a manifest file (`pro-plugins.default.json`) with commonly used premium plugins like Advanced Custom Fields Pro, Gravity Forms, and Delicious Brains products.
+The package includes a default manifest file (`repositories-packages.default.json`) with commonly used premium package repositories from Advanced Custom Fields, Gravity Forms, and Delicious Brains.
 
-**You only need to create a custom `pro-plugins.json` if:**
+### When to Create a Custom Manifest
+
+You only need to create a custom `repositories-packages.json` if:
 
 - Your premium plugin is not in the default manifest
 - You want to add additional repositories or packages
 - You need to override the default configuration
 
-To customize:
+### Creating Your Custom Manifest
 
-1. Copy the example manifest:
+Use the built-in WP-CLI command to copy the default manifest to your project root:
 
-   ```bash
-   cp vendor/peterhebert/wp-composer-sync/pro-plugins.default.json pro-plugins.json
-   ```
+```bash
+wp composer sync init-manifest
+```
 
-2. Edit `pro-plugins.json` to add your premium plugins:
+This will copy `repositories-packages.default.json` to `repositories-packages.json` in your current directory (or specify a path as an argument).
+
+Once copied, edit `repositories-packages.json` to add your premium plugin repositories:
 
    ```json
    {
@@ -169,7 +254,15 @@ To customize:
 - Easy to add entire product families (Gravity Forms, WP Migrate, etc.)
 - Maintainable - edit JSON instead of PHP code
 
-The command checks for `pro-plugins.json` first (your custom version), then falls back to `pro-plugins.default.json` (the included example).
+### How the Manifest is Loaded
+
+The command checks for manifests in this priority order:
+
+1. **Project root** - `repositories-packages.json` (your custom manifest)
+2. **Package default** - `repositories-packages.default.json` (included with this package)
+3. **Hardcoded fallback** - Minimal ACF Pro support if no manifests found
+
+This means your custom manifest completely overrides the default, so make sure to include any default plugins you still need when creating your custom version.
 
 ## Requirements
 

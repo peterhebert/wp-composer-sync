@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft-07/schema#",
   "title": "Premium WordPress Plugins Repository Manifest",
-  "description": "Configuration for known premium WordPress plugins and their composer repositories. Copy this file to 'pro-plugins.json' and customize for your needs.",
+  "description": "Configuration for known premium WordPress plugins and their composer repositories. Copy this file to 'repositories-packages.json' and customize for your needs.",
   "repositories": [
     {
       "url": "https://connect.advancedcustomfields.com",

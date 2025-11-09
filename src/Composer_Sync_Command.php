@@ -28,7 +28,7 @@ class Composer_Sync_Command extends WP_CLI_Command {
         // --- 1. Load composer.json ---
         $output_file = 'composer.json';
         if ( ! file_exists( $output_file ) ) {
-            WP_CLI::error( "{$output_file} not found. Please run 'composer init' first." );
+            WP_CLI::error( $this->get_missing_composer_json_message() );
         }
 
         $composer_json = json_decode( file_get_contents( $output_file ), true );
@@ -236,6 +236,52 @@ class Composer_Sync_Command extends WP_CLI_Command {
     }
 
     /**
+     * Copy the default premium plugin manifest to your project root for customization.
+     *
+     * ## OPTIONS
+     *
+     * [<path>]
+     * : Path where to copy the manifest file. Defaults to current directory.
+     *
+     * ## EXAMPLES
+     *
+     *     # Copy manifest to current directory
+     *     $ wp composer sync init-manifest
+     *
+     *     # Copy manifest to specific path
+     *     $ wp composer sync init-manifest /path/to/project
+     *
+     * @subcommand init-manifest
+     */
+    public function init_manifest( $args, $assoc_args ) {
+        $target_dir = isset( $args[0] ) ? rtrim( $args[0], '/' ) : getcwd();
+        $target_file = $target_dir . '/repositories-packages.json';
+        
+        if ( file_exists( $target_file ) ) {
+            WP_CLI::error( "File already exists: {$target_file}" );
+        }
+        
+        // Find the default manifest in the package directory
+        $package_dir = dirname( __DIR__ );
+        $source_file = $package_dir . '/repositories-packages.default.json';
+        
+        if ( ! file_exists( $source_file ) ) {
+            WP_CLI::error( "Default manifest not found: {$source_file}" );
+        }
+        
+        if ( ! is_writable( $target_dir ) ) {
+            WP_CLI::error( "Target directory is not writable: {$target_dir}" );
+        }
+        
+        if ( copy( $source_file, $target_file ) ) {
+            WP_CLI::success( "Copied manifest to: {$target_file}" );
+            WP_CLI::log( 'You can now edit this file to add your premium plugin repositories.' );
+        } else {
+            WP_CLI::error( "Failed to copy manifest file." );
+        }
+    }
+
+    /**
      * Tries to resolve a WP plugin, theme, or mu-plugin into a Composer package.
      *
      * @param array  $data {
@@ -307,14 +353,21 @@ class Composer_Sync_Command extends WP_CLI_Command {
      * @return array|null Repository config if found, null otherwise.
      */
     private function check_known_pro_repos( $name, $slug = null ) {
-        // Try to load from external manifest (custom first, then .default.json)
-        $base_dir = dirname( __DIR__ );
+        // Try to load from external manifest
+        // Priority: 1. Project root, 2. Package directory default
         $manifest_file = null;
         
-        if ( file_exists( $base_dir . '/pro-plugins.json' ) ) {
-            $manifest_file = $base_dir . '/pro-plugins.json';
-        } elseif ( file_exists( $base_dir . '/pro-plugins.default.json' ) ) {
-            $manifest_file = $base_dir . '/pro-plugins.default.json';
+        // Check project root first (where composer.json lives)
+        $project_root = getcwd();
+        if ( file_exists( $project_root . '/repositories-packages.json' ) ) {
+            $manifest_file = $project_root . '/repositories-packages.json';
+        } 
+        // Fall back to package's default manifest
+        else {
+            $package_dir = dirname( __DIR__ );
+            if ( file_exists( $package_dir . '/repositories-packages.default.json' ) ) {
+                $manifest_file = $package_dir . '/repositories-packages.default.json';
+            }
         }
         
         if ( $manifest_file ) {
@@ -575,4 +628,12 @@ class Composer_Sync_Command extends WP_CLI_Command {
         // (Minor/patch updates within same major are fine)
         return $existing_major === $new_major;
     }
+
+    /**
+     * Get detailed error message for missing composer.json
+     */
+    private function get_missing_composer_json_message() {
+        return 'A composer.json file was not found in this WordPress installation. Please run `composer init` in your project root.For a complete guide to Composer-managed WordPress, please visit: https://github.com/peterhebert/wp-composer-sync#setting-up-composer-for-wordpress';
+    }
 }
+
