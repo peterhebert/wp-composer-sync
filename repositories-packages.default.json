@@ -11,20 +11,6 @@
       }
     },
     {
-      "url": "https://composer.deliciousbrains.com",
-      "type": "composer",
-      "plugins": {
-        "WP Migrate DB Pro": "deliciousbrains-plugin/wp-migrate-db-pro",
-        "WP Migrate DB Pro CLI": "deliciousbrains-plugin/wp-migrate-db-pro-cli",
-        "WP Migrate DB Pro Media Files": "deliciousbrains-plugin/wp-migrate-db-pro-media-files",
-        "WP Migrate DB Pro Multisite Tools": "deliciousbrains-plugin/wp-migrate-db-pro-multisite-tools",
-        "WP Migrate DB Pro Theme & Plugin Files": "deliciousbrains-plugin/wp-migrate-db-pro-theme-plugin-files",
-        "WP Offload Media": "deliciousbrains-plugin/wp-offload-media",
-        "WP Offload Media - Assets Pull Addon": "deliciousbrains-plugin/wp-offload-media-assets-pull",
-        "WP Offload SES": "deliciousbrains-plugin/wp-offload-ses"
-      }
-    },
-    {
       "url": "https://composer.gravityforms.com",
       "type": "composer",
       "note": "All Gravity Forms plugins use the format: gravity/{slug}",
