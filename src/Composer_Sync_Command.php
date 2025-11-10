@@ -21,12 +21,38 @@ class Composer_Sync_Command extends WP_CLI_Command {
     /**
      * Scans the current WP install and merges dependencies into composer.json.
      *
+     * ## OPTIONS
+     *
+     * [--composer-file=<path>]
+     * : Path to composer.json file. Defaults to searching current directory, then parent directory.
+     *
      * @invoke
      */
     public function __invoke( $args, $assoc_args ) {
 
         // --- 1. Load composer.json ---
-        $output_file = 'composer.json';
+        if ( isset( $assoc_args['composer-file'] ) ) {
+            $output_file = $assoc_args['composer-file'];
+        } else {
+            // Try to find composer.json in common locations
+            $possible_locations = [
+                'composer.json',           // Current directory
+                '../composer.json',        // Parent directory (common for Bedrock-style setups)
+            ];
+            
+            $output_file = null;
+            foreach ( $possible_locations as $location ) {
+                if ( file_exists( $location ) ) {
+                    $output_file = $location;
+                    break;
+                }
+            }
+            
+            if ( ! $output_file ) {
+                $output_file = 'composer.json'; // Fall back to default for error message
+            }
+        }
+        
         if ( ! file_exists( $output_file ) ) {
             WP_CLI::error( $this->get_missing_composer_json_message() );
         }

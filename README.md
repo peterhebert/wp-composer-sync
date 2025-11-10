@@ -26,16 +26,24 @@ This tool is meant primarlity for converting your WordPress site to use COmposer
 
 ## Installation
 
-1.  Require this package as a development dependency in your project:
-    ```bash
-    composer require --dev peterhebert/wp-composer-sync
-    ```
+This is currently an experimental project, so no packages have yet been published. You can add this package to your composer repositories with:
 
-2.  Tell WP-CLI to load the package by creating or editing `wp-cli.yml` in your project root:
-    ```yaml
-    require:
-      - vendor/peterhebert/wp-composer-sync
-    ```
+```bash
+composer config repositories.wp-composer-sync vcs https://github.com/peterhebert/wp-composer-sync.git
+```
+
+Then you can require this package as a development dependency in your project:
+
+```bash
+composer require --dev peterhebert/wp-composer-sync
+```
+
+Finally, tell WP-CLI to load the package by creating or editing `wp-cli.yml` in your project root:
+
+```yaml
+require:
+  - vendor/peterhebert/wp-composer-sync/package.php
+```
 
 ## Usage
 
